@@ -1,6 +1,6 @@
 provider "aws" {
-  region = "us-east-1"
-  version = "~> 3.11.0"
+  region  = "us-east-1"
+  version = "~> 3.12.0"
 }
 
 variable "iam_user_prefix" {
@@ -9,18 +9,15 @@ variable "iam_user_prefix" {
 }
 
 variable "names" {
-  type = list(string)
+  type = map
 }
 
 resource "aws_iam_user" "iam_user" {
-  #count = length(var.names)
-  #name = "${var.iam_user_prefix}-iam-${var.names[count.index]}"
+  for_each = var.names
+  name     = "${var.iam_user_prefix}-iam-${each.key}"
 
-  # Above is list which will modify everything if we add in start or middle as state file store like index_key=0, index_key=1 ( these are index )
-  # Solution is to change this to Set
-
-  # With Set key will be name like index_key="1", index_key="2" ( these are actual value )
-  for_each = toset(var.names)
-  name = "${var.iam_user_prefix}-iam-${each.value}"
+  tags = {
+    city : each.value.city
+  }
 }
 
